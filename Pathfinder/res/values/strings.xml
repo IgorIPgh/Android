@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Pathfinder</string>
+    <string name="action_settings">Параметры</string>
+    <string name="action_disconnect">Отключить</string>
+    <string name="load">Загрузить</string>
+    <string name="delete">Удалить</string>
+    <string name="close">Закрыть</string>
+    <string name="connect">Подключить</string>
+    <string name="send">Отправить</string>
+    <string name="clear">Очистить</string>
+    <string name="save">Сохранить</string>
+    <string name="bt_not_available">Bluetooth не доступен</string>
+    <string name="bt_not_enabled">Bluetooth не был включён</string>
+    <string name="status_not_connected">Bluetooth не подключён</string>
+    <string name="status_conn_failed">Соединение прервано</string>
+    <string name="status_connected_to">Подключены к %s</string>
+
+</resources>
