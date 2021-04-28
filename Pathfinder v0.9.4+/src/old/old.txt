@@ -1,0 +1,387 @@
+AStar.java
+-----------------------------------------------
+
+	public ArrayList<Node> checkNeighbours() {
+		ArrayList<Node> neighbours = new ArrayList<Node>();
+		
+		currentNode = new Node((int) selectedNode.getX(), (int) selectedNode.getY());
+		/* selectedNode = new Vector(coords.getX(), coords.getY());
+		currentNode = new Node((int) coords.getX(), (int) coords.getY()); */
+		
+		for(int x = -1; x <= 1; x++) {
+			for(int y = -1; y <= 1; y++) {
+				if(x == 0 && y == 0) continue;
+				if(!new Node(currentNode.getX() + x * dd, currentNode.getY() + y * dd).isClosed()) 
+					neighbours.add(new Node(currentNode.getX() + x * 16, currentNode.getY() + y * 16));
+			}
+		}
+		
+		for(Obstacle obstacle : o) {
+			for(Node node : neighbours) {
+				if(obstacle.getX() == node.getX() && obstacle.getY() == node.getY()) {
+					neighbours.remove(node);
+				}
+			}
+		}
+		
+		return neighbours;
+	}
+	
+	/**
+	 * Выборка элемента с наименьшей общей стоимостью
+	 * 
+	 * @param nodes ArrayList соседей клекти [использовать checkNeighbours()]
+	 * @return Элемент типа Node с наименьшей общей стоимостью
+	 */
+	
+	public Node selectNode(ArrayList<Node> nodes) {
+		if(nodes.size() == 0) return null;
+		
+		Node minNode;
+		minNode = nodes.get(0);
+		
+		for(Node n : nodes) {
+			int nX = n.getX();
+			int nY = n.getY();
+			
+			/* int gCost = (int) vector.calculateDistance(nX, nY, player.getX(), player.getY());
+			int hCost = (int) vector.calculateDistance(nX, nY, target.getX(), target.getY()); */
+			int gCost = (int) Math.floor(vector.calculateDistance(new Vector(n.getX(), n.getY()), new Vector(player.getX(), player.getY())));
+			int hCost = (int) Math.floor(vector.calculateDistance(new Vector(n.getX(), n.getY()), new Vector(target.getX(), target.getY())));
+			
+			int totalCost = gCost + hCost;
+			n.setFullCost(totalCost);
+			if(n.getFullCost() < minNode.getFullCost()) minNode = n;
+		}
+		
+		selectedNode.setX(minNode.getX());
+		selectedNode.setY(minNode.getY());
+		
+		for(Node n : nodes) {
+			if(n.getX() != player.getX() && n.getY() != player.getY()) n.setClosed(true);
+		}
+		
+		return minNode;
+	}
+	
+	public ArrayList<Node> retracePath(Node startNode, Node endNode) {
+		ArrayList<Node> path = new ArrayList<Node>();
+		ArrayList<Node> checkpoints = new ArrayList<Node>();
+		Node currentNode = endNode;
+		
+		while(currentNode.equals(startNode)) {
+			path.add(currentNode);
+			currentNode = currentNode.parent;
+		}
+		
+		for(int i = 0; i <= path.size() - 1; i++) {
+			checkpoints.set(i, path.get(path.size() - 1 - i));
+		}
+		
+		return checkpoints;
+	}
+
+-----------------------------------------------
+
+AnimatePath.java
+-----------------------------------------------
+	public void AStarOld(Vector startPoint, Vector endPoint, int dd, int speed) {
+		vector = new Vector();
+		astar = new AStar(N, xoffset, x0, dd, target, player, obstacles, this);
+		int distance = (int) (Math.floor(vector.calculateDistance(new Vector(target.getX(), target.getY()), new Vector(player.getX(), player.getY()))));
+		int totalTime = distance / speed;
+		int time = totalTime / (distance / dd);
+		int iterations = 0;
+		int maxIterations = (int) Math.floor(vector.calculateDistance(new Vector(target.getX(), target.getY()), new Vector(player.getX(), player.getY()))) / dd;
+		Handler handler = new Handler();
+		if(target == null || player == null) return;
+		// while(vector.subtract(player.getPosition(), target.getPosition()).getLength() <= 0.5f * dd && iterations <= maxIterations) {
+		while(!convertToGridCoords(player.getPosition().getX(), player.getPosition().getY()).equals(convertToGridCoords(target.getPosition().getX(), target.getPosition().getY()))) {
+			ArrayList<Node> nodes = astar.checkNeighbours();
+			astar.selectNode(nodes);
+			drawPlayer(astar.getSelectedNode().getX(), astar.getSelectedNode().getY());
+			player.setPosition((int) astar.getSelectedNode().getX(), (int) astar.getSelectedNode().getY());
+			iterations++;
+			handler.postDelayed(new Runnable() {
+		         @Override 
+		         public void run() {
+		        	 
+		         }
+			}, time * 1000);
+		}
+		
+	}
+	
+	// Перемещает путь в начало игрока
+	path.reset();
+	path.moveTo(player.getX() + dd / 2, player.getY() + dd / 2);
+	path.lineTo(x, y);
+	
+	path.lineTo(target.getX() + dd / 2, target.getY() + dd / 2);
+		
+		// Измерить путь
+		PathMeasure measure = new PathMeasure(path, false);
+		length = measure.getLength();
+		// создать аниматор
+		ObjectAnimator animator = ObjectAnimator.ofFloat(AnimatePath.this, "route", 1.0f, 0.0f);
+		animator.setDuration(totalTime * 50);
+		animator.start(); // вызывает setRoute
+	
+	
+-----------------------------------------------
+
+public Obstacle searchForClosest(Node node) {
+		if(obstacles.isEmpty())
+			return null;
+		
+		ArrayList<Node> neighbourNodes = new ArrayList<Node>();
+		
+		for(int x = 0; x <= 1; x++) {
+			for(int y = 0; y <= 1; y++) {
+				for(Obstacle o : obstacles) {
+					int gx = (int) convertToGridCoords(node.getX(), node.getY()).getX();
+					int gy = (int) convertToGridCoords(node.getY(), node.getY()).getY();
+
+					if(gx < 0 || gx > N || gy > N || gy < 0)
+						continue;
+					
+					neighbourNodes.add(new Node(node.getX() + x * dd, node.getY() + y * dd));
+					
+					if(o.getGridX() == (gx + x) && o.getGridY() == (gy + y)) {
+						return o;
+					}
+				}
+			}
+		}
+		
+		for(Node n : neighbourNodes) {
+			if(searchForClosest(node) != null)
+				return searchForClosest(node);
+		}
+		
+		return obstacle;
+	}
+	
+	public Obstacle searchForClosest(int type) {
+		if(obstacles.isEmpty())
+			return null;
+		
+		ArrayList<Node> neighbourNodes = new ArrayList<Node>();
+		Obstacle closestObst = obstacles.get(new Random().nextInt(obstacles.size()));
+		boolean[] types = new boolean[3];
+		
+		Entity entityType = (Target) target;
+		
+		switch (type) {
+			case 1:
+				entityType = (Player) player;
+			case 2:
+				entityType = (Target) target;
+		}
+		
+		for(int x = 0; x <= 1; x++) {
+			for(int y = 0; y <= 1; y++) {
+				for(Obstacle o : obstacles) {
+					int gx = (int) convertToGridCoords(entityType.getX(), entityType.getY()).getX();
+					int gy = (int) convertToGridCoords(entityType.getY(), entityType.getY()).getY();
+					
+					if(gx < 0 || gx > N || gy > N || gy < 0)
+						continue;
+					
+					neighbourNodes.add(new Node(entityType.getX() + x * dd, entityType.getY() + y * dd));
+					
+					if(o.getGridX() == (gx + x) && o.getGridY() == (gy + y)) {
+						closestObst = o;
+						return closestObst;
+					}
+				}
+			}
+		}
+		
+		for(Node n : neighbourNodes) {
+			if(searchForClosest(node) != null)
+				return searchForClosest(node);
+		}
+		
+		return obstacle;
+	}
+
+	public boolean checkObstacle(Obstacle obstacle) {
+		if(player == null && target == null || player.getX() != DEFAULT_COORD || target.getX() != DEFAULT_COORD)
+		for(Obstacle o : obstacles) {
+			if(o.isClosed())
+				o.setClosed(false);
+		}
+		boolean foundEmptyPath = false;
+		
+		if(obstacles.size() <= 1)
+			return true;
+		
+		Obstacle currObst = obstacle;
+		ArrayList<Obstacle> oNeighbours = getObstNeighbours(currObst);
+		currObst.setMainObst(true);
+		
+		if(oNeighbours == null)
+			return true;
+		
+		int iterations = obstacles.size();
+		
+		int i = 0;
+		while(i <= iterations - 1) {
+			if(getOneObstacle(oNeighbours, target.getPosition()) == null)
+				return false;
+			currObst = getOneObstacle(oNeighbours, target.getPosition());
+			oNeighbours = getObstNeighbours(currObst);
+			if(oNeighbours == null)
+				return true;
+			if(oNeighbours.size() == 1 && oNeighbours.get(0).isMainObst())
+				return false;
+			currObst.setClosed(true);
+			i++;
+		}
+		
+		return foundEmptyPath;
+	}
+	
+	public boolean checkPossibility() {
+		if(player == null && target == null || player.getX() != DEFAULT_COORD || target.getX() != DEFAULT_COORD)
+		for(Obstacle o : obstacles) {
+			if(o.isClosed())
+				o.setClosed(false);
+		}
+		boolean foundEmptyPath = false;
+		
+		if(obstacles.isEmpty())
+			return true;
+		
+		Point targetPos = target.getPosition();
+		
+		Obstacle currObst = getClosestObstacle(targetPos);
+		ArrayList<Obstacle> oNeighbours = getObstNeighbours(currObst);
+		currObst.setMainObst(true);
+		
+		if(oNeighbours.isEmpty())
+			return true;
+		
+		int iterations = obstacles.size();
+		
+		int i = 0;
+		while(i <= iterations - 1) {
+			currObst = getOneObstacle(oNeighbours, targetPos);
+			oNeighbours = getObstNeighbours(currObst);
+			if(oNeighbours == null)
+				return true;
+			if(oNeighbours.size() == 1 && oNeighbours.get(0).isMainObst())
+				return false;
+			currObst.setClosed(true);
+			i++;
+		}
+		
+		return foundEmptyPath;
+	}
+	
+	public ArrayList<Obstacle> getObstNeighbours(Obstacle o) {
+		ArrayList<Obstacle> n = new ArrayList<Obstacle>();
+		
+		for(int x = -1; x <= 1; x++) {
+			for(int y = -1; y <= 1; y++) {
+				if(x == 0 && y == 0) continue;
+				// if(!diagonal && (x == -1 || x == 1) && (y == -1 || y == 1)) continue;
+				
+				int checkX = o.getGridX() + x;
+				int checkY = o.getGridY() + y;
+					
+				// Позиции в экранных координатах (временные переменные)
+				int t1 = (int) convertToScreenCoords(checkX, checkY, true).getX();
+				int t2 = (int) convertToScreenCoords(checkX, checkY, true).getY();
+				
+				for(Obstacle obst : obstacles) {
+					if(t1 >= x0 && t1 < canvasWidth - xoffset && t2 <= canvasHeight - y0 && obst.getX() == t1 && obst.getY() == t2 && !obst.isClosed()) {
+						n.add(obst);
+					}
+				}
+			}
+		}
+		
+		if(n.isEmpty())
+			return null;
+		
+		return n;
+	}
+	
+	public Obstacle getClosestObstacle(Point position) {
+		Obstacle closestObst = obstacles.get(new Random().nextInt(obstacles.size()));
+		double dx = (closestObst.getX() - position.getX());
+		double dy = (closestObst.getY() - position.getY());
+		closestObst.setDistance((float) Math.sqrt(dx * dx + dy * dy));
+		
+		for(Obstacle o : obstacles) {
+			double dt = (o.getX() - position.getX());
+			double dty = (o.getY() - position.getY());
+			float d = (float) Math.sqrt(dt * dt + dty * dty);
+			if(d < closestObst.getDistance()) {
+				closestObst = o;
+				closestObst.setDistance(d);
+			}
+		}
+		
+		return closestObst;
+	}
+	
+	public Obstacle getOneObstacle(ArrayList<Obstacle> o, Point position) {
+		double dt, dty;
+		Obstacle closestObst = o.get(new Random().nextInt(o.size()));
+		for(Obstacle ob : o) {
+			if(closestObst.isClosed())
+			closestObst = o.get(new Random().nextInt(o.size()));
+		}
+		
+		if(closestObst.isClosed())
+			return null;
+		
+		double dx = (closestObst.getX() - position.getX());
+		double dy = (closestObst.getY() - position.getY());
+		closestObst.setDistance((float) Math.sqrt(dx * dx + dy * dy));
+		
+		for(Obstacle obst : o) {
+			if(obst.isMainObst())
+				continue;
+			dt = (obst.getX() - position.getX());
+			dty = (obst.getY() - position.getY());
+			float d = (float) Math.sqrt(dt * dt + dty * dty);
+			if(d < closestObst.getDistance()) {
+				closestObst = obst;
+				closestObst.setDistance(d);
+			}
+		}
+		
+		return closestObst;
+	}
+	
+--------------------------------- Databases -----------------------------------
+
+	public String[] getNameByPosition(long id) {
+		String[] names = new String[2];
+		
+		/* String selectQuery = "SELECT " + dbhelper.FIRST_NAME + ", " + dbhelper.LAST_NAME
+				+ " FROM " + dbhelper.TABLE_NAME
+				+ " WHERE " + dbhelper.TABLE_NAME + "." + dbhelper.ID + "=" + id + ";";	
+
+		Cursor cursor = database.rawQuery(selectQuery, null);
+		if (cursor.moveToFirst()) {
+			do {
+				
+			} while (cursor.moveToNext());
+		} */
+
+		Cursor cursor = database.query(DBHelper.TABLE_ELEMENTS, new String[] { DBHelper.ID,
+				DBHelper.MAP_NAME }, DBHelper.ID + "=?",
+				new String[] { String.valueOf(id) }, null, null, null, null);
+		if (cursor != null)
+			cursor.moveToFirst();
+		else return null;
+		
+		names[0] = cursor.getString(1);
+		
+		return names;
+	}
