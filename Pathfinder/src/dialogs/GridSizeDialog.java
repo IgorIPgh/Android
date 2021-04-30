@@ -45,7 +45,7 @@ public class GridSizeDialog extends DialogFragment implements SeekBar.OnSeekBarC
         LayoutInflater i = getActivity().getLayoutInflater();
         
         db.setTitle("Изменение размера");
-        View v = i.inflate(R.layout.dialog, null);
+        View v = i.inflate(R.layout.gsize_dialog, null);
         
         sb1 = (SeekBar) v.findViewById(R.id.seekBar1);
 		sb1.setOnSeekBarChangeListener(this);

@@ -16,5 +16,15 @@
     <string name="status_not_connected">Bluetooth не подключён</string>
     <string name="status_conn_failed">Соединение прервано</string>
     <string name="status_connected_to">Подключены к %s</string>
+    <string name="settings">Настройки приложения</string>
+    <string name="algorithm">Выбор алгоритма</string>
+    <string name="color_picker">Выбор цвета</string>
+    <string name="theme_selector">Выбор темы</string>
+    <string name="grid_size">Размер поля</string>
+    <string name="random_color">Случайный цвет</string>
+    <string name="weight_change">Изменить веса (A*)</string>
+    <string name="exchange">Обмен картами</string>
+    <string name="default_gsize_message">Выбранный размер: 16</string>
+    <string name="save_and_exit">Сохранить и выйти</string>
 
 </resources>

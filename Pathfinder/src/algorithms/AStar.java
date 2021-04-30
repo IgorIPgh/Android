@@ -64,10 +64,8 @@ public class AStar {
 			closedSet.add(currentNode);
 			iterations++;
 			
-			if(iterations > maxIterations) {
-				view.makeToast("Невозможно найти путь!", Toast.LENGTH_LONG).show();
+			if(iterations > maxIterations)
 				return null;
-			}
 			
 			// if(Math.abs(currentNode.getX() - targetNode.getX()) == 1  && Math.abs(currentNode.getY() - targetNode.getY()) == 1) {
 			if(currentNode.getX() == targetNode.getX() && currentNode.getY() == targetNode.getY()) {

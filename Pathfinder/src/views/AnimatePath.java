@@ -9,17 +9,18 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import com.example.pathfinder.MainActivity;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.PathEffect;
 import android.graphics.PathMeasure;
+import android.widget.TextView;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 import databases.Field;
 import databases.SQLController;
@@ -52,11 +53,11 @@ public class AnimatePath extends View {
 	private RectF rect = new RectF();
 	
 	Context context;
-	TextView iterationsCount;
+	TextView displayState;
 	GridSizeDialog gsd = new GridSizeDialog();
 	
 	// Экземпляр класса для методов для алгоритма A*
-//	AStar astar;
+	AStar astar;
 	
 	// Полотно
 	Canvas canvas;
@@ -74,38 +75,33 @@ public class AnimatePath extends View {
 	
 	ArrayList<SideNode> sNodes = new ArrayList<SideNode>();
 	
-	private int playerColor = Color.GREEN, targetColor = Color.RED, pathColor = Color.GRAY;
+	private int playerColor = Color.GREEN, targetColor = Color.RED, pathColor = Color.BLUE;
 	private String mapName;
 	private boolean eDistance = false;
 
 	public AnimatePath(Context context) {
 		super(context);
-		init();
+		init(context);
 	}
 	
 	public AnimatePath(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init();
+		init(context);
 	}
 
 	public AnimatePath(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		init();
+		init(context);
 	}
 
-	public AnimatePath(Context context, TextView iterationsCount) {
-		super(context);
-		this.iterationsCount = iterationsCount;
-		init();
-	}
-
-	public void init() {
+	public void init(Context context) {
 		x0 = 20;
 		y0 = 20;
 		gridSize = 16;
 		paint = new Paint();
 		strokePaint = new Paint();
 		path = new Path();
+		this.context = context;
 	}
 	
 	public void setPath(Path p, int duration) {
@@ -305,22 +301,27 @@ public class AnimatePath extends View {
 	public void AStar(Point startPoint, Point endPoint, int dd, int speed) {
 		vector = new Point();
 		Path path = new Path();
-		AStar astar = new AStar(target, player, obstacles, this, enableNeighbours, eDistance, dd);
+		astar = new AStar(target, player, obstacles, this, enableNeighbours, eDistance, dd);
 		// int time = totalTime / (distance / dd) * 1000;
 		Point tempp = convertToGridCoords(player.getPosition().getX(), player.getPosition().getY());
 		Point tempt = convertToGridCoords(target.getPosition().getX(), target.getPosition().getY());
 		
-		ArrayList<Point> pos = astar.findPath(new Point(tempp.getX(), tempp.getY()), new Point(tempt.getX(), tempt.getY()));
+		ArrayList<Point> positions = astar.findPath(new Point(tempp.getX(), tempp.getY()), new Point(tempt.getX(), tempt.getY()));
 		
-		if(pos == null || pos.isEmpty())
+		if(positions == null || positions.isEmpty()) {
+			MainActivity activity = (MainActivity) context;
+			((TextView) activity.getDisplayState()).setText("Не удалось найти путь!");
+			getPath().reset();
+			invalidate();
 			return;
+		}
 		
-		float distance = calculateTotalDistance(pos);
+		float distance = calculateTotalDistance(positions);
 		int totalTime = (int) distance / speed;
 		
 		path.moveTo(player.getX() + dd / 2, player.getY() + dd / 2);
 		
-		for(Point v : pos) {
+		for(Point v : positions) {
 			int x = (int) (convertToScreenCoords(v.getX(), v.getY(), true).getX() + dd / 2);
 			int y = (int) (convertToScreenCoords(v.getX(), v.getY(), true).getY() + dd / 2);
 				
@@ -338,8 +339,13 @@ public class AnimatePath extends View {
 		
 		ArrayList<Point> positions = dijkstra.startDijkstra();
 		
-		if(positions == null || positions.isEmpty())
-		return;
+		if(positions == null || positions.isEmpty()) {
+			MainActivity activity = (MainActivity) context;
+			((TextView) activity.getDisplayState()).setText("Не удалось найти путь!");
+			getPath().reset();
+			invalidate();
+			return;
+		}
 		
 		float distance = calculateTotalDistance(positions);
 		int totalTime = (int) (distance / speed);
@@ -354,6 +360,7 @@ public class AnimatePath extends View {
 		}
 		
 		path.lineTo(endPoint.getX() + dd / 2, endPoint.getY() + dd / 2);
+		drawPath = true;
 		setPath(path, totalTime);
 	}
 	
@@ -365,8 +372,13 @@ public class AnimatePath extends View {
 		float distance = calculateTotalDistance(positions);
 		int totalTime = (int) (distance / speed);
 		
-		if(positions == null || positions.isEmpty())
+		if(positions == null || positions.isEmpty()) {
+			MainActivity activity = (MainActivity) context;
+			((TextView) activity.getDisplayState()).setText("Не удалось найти путь!");
+			getPath().reset();
+			invalidate();
 			return;
+		}
 		
 		path.moveTo(startPoint.getX() + dd / 2, startPoint.getY() + dd / 2);
 		
@@ -378,11 +390,12 @@ public class AnimatePath extends View {
 		}
 		
 		path.lineTo(endPoint.getX() + dd / 2, endPoint.getY() + dd / 2);
+		drawPath = true;
 		setPath(path, totalTime);
 	}
 		
-	public Toast makeToast(String message, int duration) {
-		return Toast.makeText(getContext(), message, duration);
+	public void makeToast(String message, int duration) {
+		Toast.makeText(getContext(), message, duration).show();
 	}
 	
 	public void drawPlayer(float x, float y) {
@@ -647,6 +660,12 @@ public class AnimatePath extends View {
 		}
 		
 		return new Point(dx, dy);
+	}
+	
+	public void setDrawingMode(boolean mode) {
+		drawPlayer = mode;
+		drawTarget = mode;
+		drawObstacle = mode;
 	}
 	
 	// ------------------- Геттеры и сеттеры

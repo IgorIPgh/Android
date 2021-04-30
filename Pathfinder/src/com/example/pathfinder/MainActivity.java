@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -38,15 +39,17 @@ import dialogs.SaveDialog;
 import dialogs.SaveDialog.SaveDialogListener;
 import dialogs.ThemeDialog;
 import dialogs.ThemeDialog.ThemeListener;
+import dialogs.WeightDialog.WeightListener;
 import entities.Entity;
+import entities.Node;
 import entities.Obstacle;
 import math.Point;
 import views.AnimatePath;
 
-public class MainActivity extends Activity implements OnClickListener, ColorPickListener, GridSizeListener,
-		AlgorithmListener, ThemeListener, SaveDialogListener, MapListener {
+public class MainActivity extends Activity implements OnClickListener, ColorPickListener,
+		AlgorithmListener, SaveDialogListener, MapListener, WeightListener {
 	// компоненты UI
-	Button start;
+	Button start, algBtn;
 	Button player, obstacle, target;
 	TextView displayState, iterationsCount;
 	int px, py, tx, ty, pColor, tColor;
@@ -67,9 +70,14 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 
 	private int iterations = 0;
 	private int algorithm = 0;
+	private int theme = 0;
 
 	// Экземпляр класса для анимаций
 	AnimatePath view;
+	
+	// Другое
+	private int currentAlgState = 0;
+	public static final int MAX_ALGORITHM_SIZE = 2;
 
 	// Координаты нажатий
 	private float xCoord, yCoord, x, y;
@@ -78,7 +86,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	Point coords, screenCoords;
 
 	// Поле карты
-	Field field = new Field(1, "default", 16, Color.GREEN, Color.RED, Color.LTGRAY);
+	Field field = new Field(1, "default", 16, Color.GREEN, Color.RED, Color.GRAY);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +98,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 		player = (Button) findViewById(R.id.player);
 		obstacle = (Button) findViewById(R.id.obstacle);
 		target = (Button) findViewById(R.id.target);
+		algBtn = (Button) findViewById(R.id.algBtn);
 		displayState = (TextView) findViewById(R.id.textView1);
 		iterationsCount = (TextView) findViewById(R.id.textView2);
 		background = (LinearLayout) findViewById(R.id.LinearLayout1);
@@ -101,13 +110,13 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 		controller = new SQLController(getApplicationContext());
 		view = (AnimatePath) findViewById(R.id.pathAnimator1);
 		view.setMap(field);
-
-		new AnimatePath(getApplicationContext(), iterationsCount);
+		new AnimatePath(getApplicationContext());
 
 		// Назначение обработчиков событий
 		player.setOnClickListener(this);
 		obstacle.setOnClickListener(this);
 		target.setOnClickListener(this);
+		algBtn.setOnClickListener(this);
 
 		state = State.PLAYER;
 	}
@@ -127,12 +136,18 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			state = State.TARGET;
 			displayState.setText("Цель");
 			break;
+		case R.id.algBtn:
+			currentAlgState++;
+			if(currentAlgState > MAX_ALGORITHM_SIZE)
+				currentAlgState = 0;
+			checkAlgorithm(currentAlgState);
+			break;
 		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.menu, menu);
+		getMenuInflater().inflate(R.menu.updated_menu, menu);
 		return true;
 	}
 
@@ -153,6 +168,12 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 		case R.id.clearMap:
 			view.clearMap();
 			break;
+		case R.id.settings:
+			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+			settingsIntent.putExtra("gridSize", view.getGridSize());
+			settingsIntent.putExtra("theme", theme);
+			startActivityForResult(settingsIntent, 1);
+			break;
 		case R.id.bluetooth:
 			Intent btIntent = new Intent(getApplicationContext(), ExchangeActivity.class);
 			startActivity(btIntent);
@@ -165,18 +186,6 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			WeightDialog wd = new WeightDialog();
 			wd.show(getFragmentManager(), "ncost");
 			break;
-		case R.id.gridSize:
-			GridSizeDialog gSizeDialog = new GridSizeDialog();
-			gSizeDialog.show(getFragmentManager(), "grid");
-			break;
-		case R.id.theme:
-			ThemeDialog themeDialog = new ThemeDialog();
-			themeDialog.show(getFragmentManager(), "theme");
-			break;
-		case R.id.algorithm:
-			AlgorithmSelector algDialog = new AlgorithmSelector();
-			algDialog.show(getFragmentManager(), "algorithm");
-			break;
 		case R.id.actionDelete:
 			state = State.DELETE;
 			displayState.setText("Удаление");
@@ -184,6 +193,17 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) {return;}
+		if (resultCode == RESULT_OK) {
+			changeGridSize(data.getIntExtra("gSize", 16));
+		    theme = data.getIntExtra("tcode", 0);
+		    onThemeSelected(theme);
+		} else
+			Toast.makeText(getApplicationContext(), "Произошла ошибка!", Toast.LENGTH_SHORT).show();
 	}
 
 	// Начало анимации
@@ -270,25 +290,16 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 
 		return super.onTouchEvent(event);
 	}
-
-//	public int getAlgorithm() {
-//		return algorithm;
-//	}
-
+	
 	public void setAlgorithm(int algorithm) {
 		this.algorithm = algorithm;
 	}
 
-//	public int getId() {
-//		return id;
-//	}
+	public TextView getDisplayState() {
+		return displayState;
+	}
 
-//	public void setId(int id) {
-//		this.id = id;
-//	}
-
-	@Override
-	public void changeGridSize(DialogFragment dialog, int gridSizeValue) {
+	public void changeGridSize(int gridSizeValue) {
 		if (view.getPlayer() == null || view.getTarget() == null) {
 			Toast.makeText(getApplicationContext(), "Сначала поставьте начальную или конечную точку!",
 					Toast.LENGTH_LONG).show();
@@ -299,12 +310,11 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	}
 
 	@Override
-	public void invalidName(DialogFragment dialog) {
-
-	}
-
-	@Override
 	public void algorithmSelected(int algorithm) {
+		checkAlgorithm(algorithm);
+	}
+	
+	public void checkAlgorithm(int algorithm) {
 		setAlgorithm(algorithm);
 		if (algorithm == 1) { // Если выбран алгоритм best-first
 			cb.setClickable(false);
@@ -313,6 +323,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			distanceCb.setClickable(false);
 			distanceCb.setChecked(false);
 			distanceCb.setAlpha(0.5f);
+			algBtn.setText("Best-first");
 		} else if (algorithm == 0) {
 			cb.setClickable(true);
 			cb.setChecked(true);
@@ -321,6 +332,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			distanceCb.setAlpha(1.0f);
 			nbCheckBox.setClickable(true);
 			nbCheckBox.setAlpha(1.0f);
+			algBtn.setText("Алгоритм A*");
 		} else if (algorithm == 2) {
 			cb.setClickable(false);
 			cb.setChecked(false);
@@ -330,18 +342,27 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			distanceCb.setAlpha(0.5f);
 			nbCheckBox.setClickable(false);
 			nbCheckBox.setAlpha(0.5f);
+			algBtn.setText("Дейкстра");
 		}
 	}
 
 	@Override
 	public void onPickedColor(int pColor, int tColor, int pathColor) {
-		view.setPlayerColor(pColor);
-		view.setTargetColor(tColor);
-		view.setPathColor(pathColor);
+		if(pColor != -1)
+			view.setPlayerColor(pColor);
+		if(tColor != -1)
+			view.setTargetColor(tColor);
+		if(pathColor != -1)
+			view.setPathColor(pathColor);
+	}
+	
+	@Override
+	public void onWeightSelected(int d, int h) {
+		Toast.makeText(getApplicationContext(), "Изменены веса: " + d + "d " + h + "h", Toast.LENGTH_SHORT).show();
 	}
 
-	@Override
 	public void onThemeSelected(int theme) {
+		this.theme = theme;
 		switch (theme) {
 		case 0: // Выбрана космическая тема
 			view.setClassic(false);
@@ -354,6 +375,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			player.setTextColor(purpleColor);
 			target.setTextColor(purpleColor);
 			obstacle.setTextColor(purpleColor);
+			algBtn.setTextColor(purpleColor);
 			iterationsCount.setTextColor(Color.WHITE);
 			displayState.setTextColor(purpleColor);
 			cb.setTextColor(Color.WHITE);
@@ -365,7 +387,8 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			player.setBackgroundResource(R.drawable.rounded_shape);
 			target.setBackgroundResource(R.drawable.rounded_shape);
 			obstacle.setBackgroundResource(R.drawable.rounded_shape);
-			background.setBackgroundResource(R.drawable.universe1);
+			background.setBackgroundResource(R.drawable.universe);
+			algBtn.setBackgroundResource(R.drawable.rounded_shape);
 			break;
 
 		case 1: // Выбрана классическая тема
@@ -377,6 +400,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			target.setTextColor(Color.BLACK);
 			obstacle.setTextColor(Color.BLACK);
 			iterationsCount.setTextColor(Color.BLACK);
+			algBtn.setTextColor(Color.BLACK);
 			displayState.setTextColor(Color.BLACK);
 			cb.setTextColor(Color.BLACK);
 			distanceCb.setTextColor(Color.BLACK);
@@ -387,54 +411,12 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			player.setBackgroundResource(R.drawable.classic_shape);
 			obstacle.setBackgroundResource(R.drawable.classic_shape);
 			target.setBackgroundResource(R.drawable.classic_shape);
+			algBtn.setBackgroundResource(R.drawable.classic_shape);
 			background.setBackgroundResource(R.drawable.classic_shape);
 			background.setBackgroundColor(Color.WHITE);
 			break;
 		}
 	}
-
-//	@Override
-//	public void saveMap(int[] colors, String mapName, ArrayList<Point> positions) {
-////		controller = new SQLController(getApplicationContext());
-////		controller.open();
-//		
-////		displayState.setText("Сохранение...");
-//		
-//		// Перевод позиции начальной и конечной точки в координаты сетки
-//		Point pPos = new Point(view.getPlayer().getGx(), view.getPlayer().getGy());
-//		Point tPos = new Point(view.getTarget().getGx(), view.getTarget().getGy());
-//
-//		int id = 0;
-//		if(!controller.nameExists(mapName)) {
-//			id = (int) controller.insertMap(mapName, view.getGridSize(), colors[0], colors[1], colors[2]);
-//			if(!(positions == null || positions.isEmpty())) {
-//				for(Point p : positions) {
-//					controller.insertElement((int) p.getX(), (int) p.getY(), 3, id);
-//				}
-//			}
-//			controller.insertElement((int) pPos.getX(), (int) pPos.getY(), 1, id);
-//			controller.insertElement((int) tPos.getX(), (int) tPos.getY(), 2, id);
-//		} else {
-//			int mapID = (int) controller.getIdByName(mapName);
-//			id = (int) controller.updateMap(mapID, mapName, view.getGridSize(), colors[0], colors[1], colors[2]);
-//			ArrayList<Cell> obstacleCells = controller.readObstacles(mapID);
-//			for(Cell cell : obstacleCells) {
-//				controller.deleteElements(cell.cx, cell.cy, 3, mapID);
-//			}
-//			if(!(positions == null || positions.isEmpty())) {
-//				for(Point p : positions) {
-//					controller.insertElement((int) p.getX(), (int) p.getY(), 3, (int) mapID);
-//				}
-//			}
-//			id = (int) controller.getIdByMapId(1, (int) mapID);
-//			controller.updateElements(id, (int) pPos.getX(), (int) pPos.getY(), 1, (int) mapID);
-//			id = (int) controller.getIdByMapId(2, (int) mapID);
-//			controller.updateElements(id, (int) tPos.getX(), (int) tPos.getY(), 2, (int) mapID);
-//		}
-//		
-////		controller.close();
-//		displayState.setText("Сохранено!");
-//	}
 
 	@Override
 	public void saveMap(String mapName) {

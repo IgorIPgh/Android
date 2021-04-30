@@ -2,6 +2,7 @@ package dialogs;
 
 import com.example.pathfinder.R;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -24,13 +25,19 @@ public class WeightDialog extends DialogFragment {
 	
 	Node node = new Node();
 	
+	public interface WeightListener {
+		public void onWeightSelected(int d, int h);
+	}
+	
+	private WeightListener listener;
+	
 	@Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Dialog dialog = super.onCreateDialog(savedInstanceState);
         AlertDialog.Builder db = new AlertDialog.Builder(getActivity());
         LayoutInflater i = getActivity().getLayoutInflater();
         
-        db.setTitle("Создание карты");
+        db.setTitle("Изменение весов (A*)");
         View v = i.inflate(R.layout.weight_dialog, null);
         
         np1 = (NumberPicker) v.findViewById(R.id.numberPicker1);
@@ -62,24 +69,19 @@ public class WeightDialog extends DialogFragment {
 				@Override
 				public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
 					hCost = newVal;
-			    	/* et1.setText(String.valueOf(dCost));
-			    	et2.setText(String.valueOf(hCost)); */
 					displayWeight.setText("Текущие размеры: " + dCost + "d" + " " + hCost + "h");
-					// Toast.makeText(getActivity(), "Стоимости: " + dCost + " " + hCost, Toast.LENGTH_SHORT).show();;
 				}
 			});
         }
         
         displayWeight = (TextView) v.findViewById(R.id.textView1);
-        /* et1 = (EditText) v.findViewById(R.id.editText1);
-        et2 = (EditText) v.findViewById(R.id.editText2); */
         
 		db.setView(v);
 		db.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
+		    	listener.onWeightSelected(dCost, hCost);
 		    	Node.CELL_COST = hCost;
 		    	Node.DIAGONAL_COST = dCost;
-		    	Toast.makeText(getActivity(), "Изменены размеры сетки: " + dCost + "d" + " " + hCost + "h", Toast.LENGTH_LONG).show();
 				getDialog().dismiss();
 		    }
 		});
@@ -104,6 +106,20 @@ public class WeightDialog extends DialogFragment {
 		});
         
         return db.create();
+    }
+	
+	@Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Проверить, что activity реализовала interface 
+        try {
+            // Получаем ссылку на NoticeDialogListener для доставки событий в activity 
+            listener = (WeightListener) activity;
+        } catch (ClassCastException e) {
+            // activity не реализовала интерфейс 
+            throw new ClassCastException(activity.toString()
+                    + " реализуйте NoticeDialogListener");
+        }
     }
 	
 }

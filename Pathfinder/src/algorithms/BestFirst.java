@@ -72,7 +72,7 @@ public class BestFirst {
 			
 			iterations++;
 			if(iterations > MAX_ITERATIONS) {
-				view.makeToast("Не удалось найти путь - слишком долго!", Toast.LENGTH_SHORT).show();
+				view.makeToast("Не удалось найти путь - слишком долго!", Toast.LENGTH_SHORT);
 				return null;
 			}
 			

@@ -24,9 +24,7 @@ public class ColorPickDialog extends DialogFragment {
 
 	LinearLayout ln1, ln2, ln3;
 	TextView tv1, tv2, tv3;
-	int currentPColor = Color.GREEN;
-	int currentTColor = Color.RED;
-	int currentPathColor = Color.BLUE;
+	private int currentPColor = -1, currentTColor = -1, currentPathColor = -1;
 	SQLController controller;
 	Button generateRandom;
 	String[] pColorNames = new String[] {"Красный", "Синий", "Зелёный", "Желтый", "Фиолетовый", "Аква"};
@@ -113,18 +111,6 @@ public class ColorPickDialog extends DialogFragment {
 			b.setId(j);
 			//b.setLayoutParams(new LayoutParams(80, 80));
 			b.setColorFilter(colorsArray[j]);
-			
-			switch(mode) {
-				case 1:
-					currentPColor = Color.GREEN;
-					break;
-				case 2:
-					currentTColor = Color.RED;
-					break;
-				case 3:
-					currentPathColor = Color.BLUE;
-					break;
-			}
 
 			b.setOnClickListener(new OnClickListener() {
 				@Override

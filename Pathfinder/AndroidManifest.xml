@@ -29,6 +29,10 @@
         <activity android:name="com.example.pathfinder.ExchangeActivity" >
         </activity>
         <activity
+            android:name="com.example.pathfinder.SettingsActivity"
+            android:label="@string/settings" >
+        </activity>
+        <activity
             android:name="com.example.bluetoothspplibrary.DeviceList"
             android:label="DeviceList" >
         </activity>

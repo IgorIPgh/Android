@@ -249,9 +249,6 @@ public class SQLController {
 	}
 
 	public boolean nameExists(String name) {
-//		if (getNameCount(name) <= 0)
-//			return false;
-//		return true;
 		return getNameCount(name) > 0;
 	}
 
@@ -301,6 +298,7 @@ public class SQLController {
 			return 2;
 
 		database.close();
+		ap.setDrawingMode(true);
 		ap.invalidate();
 		return 0;
 	}
@@ -345,32 +343,11 @@ public class SQLController {
 		return 0;
 	}
 
-	// удаление
-//	public void deleteCell(int cell_id) {
-//		database = dbhelper.getWritableDatabase();
-//		database.delete(DBHelper.TABLE_ELEMENTS, DBHelper.ID + cell_id, null);
-//		database.close();
-//	}
-
 	public void deleteCells(int map_id) {
 		database = dbhelper.getWritableDatabase();
 		database.delete(DBHelper.TABLE_ELEMENTS, DBHelper.MAP_ID + "=" + map_id, null);
 		database.close();
 	}
-
-//	public void deleteCell(int oX, int oY, int map_id) {
-//		database = dbhelper.getWritableDatabase();
-//		database.delete(DBHelper.TABLE_ELEMENTS, DBHelper.CELL_X + "=" + oY + " AND " + DBHelper.MAP_ID + "=" + map_id
-//				+ " AND " + DBHelper.CELL_Y + "=" + oY, null);
-//		database.close();
-//	}
-
-//	public void deleteObstacles(long mapID) {
-//		database = dbhelper.getWritableDatabase();
-//		database.delete(DBHelper.TABLE_ELEMENTS, DBHelper.MAP_ID + "=" + mapID + " AND " + DBHelper.CELL_CODE + ">2",
-//				null);
-//		database.close();
-//	}
 
 	public int deleteMap(long id) {
 		database = dbhelper.getWritableDatabase();

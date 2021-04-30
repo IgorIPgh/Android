@@ -65,7 +65,7 @@ public class Dijkstra {
 			
 			iterations++;
 			if(iterations > MAX_ITERATIONS) {
-				view.makeToast("Не удалось найти путь - слишком долго!", Toast.LENGTH_SHORT).show();
+				view.makeToast("Не удалось найти путь - слишком долго!", Toast.LENGTH_SHORT);
 				return null;
 			}
 			
@@ -88,11 +88,13 @@ public class Dijkstra {
 			}
 			NodeComparator comparator = new NodeComparator();
 			Collections.sort(mainQueue, comparator);
-			currentNode = mainQueue.peekFirst().getA();
+			if(!mainQueue.isEmpty())
+				currentNode = mainQueue.peekFirst().getA();
+			else
+				currentNode = null;
             if (currentNode == null || pathMap.containsKey(endNode)) {
                 break;
             }
-			
 		} while (!mainQueue.isEmpty());
 		
 		long lastTime = System.currentTimeMillis();
