@@ -26,12 +26,6 @@
         android:title="@string/settings"/>
 	
 	<item
-        android:id="@+id/selectColor"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:showAsAction="ifRoom"
-        android:title="@string/color_picker"/>
-	
-	<item
         android:id="@+id/changeWeight"
         android:icon="@android:drawable/ic_menu_rotate"
         android:showAsAction="ifRoom"

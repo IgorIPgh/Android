@@ -179,6 +179,8 @@ public class AnimatePath extends View {
 		}
 		sNodes.clear();
 		
+		MainActivity activity = (MainActivity) context;
+		((TextView) activity.getDisplayState()).setText("Начало поиска!");
 		switch(algorithm) {
 			case 0:
 				AStar(player.getPosition(), target.getPosition(), getDd(), 45);

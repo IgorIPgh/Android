@@ -5,60 +5,66 @@
         android:id="@+id/loadMap"
         android:icon="@android:drawable/ic_menu_mapmode"
         android:showAsAction="always"
-        android:title="Загрузить карту"/>
+        android:title="@string/load"/>
         
     <item
         android:id="@+id/saveMap"
         android:icon="@android:drawable/ic_menu_save"
         android:showAsAction="always"
-        android:title="Сохранить карту"/>
+        android:title="@string/save"/>
        
 	<item
         android:id="@+id/clearMap"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:showAsAction="always"
-        android:title="Очистить карту"/>
+        android:title="@string/clear"/>
+	
+	<item
+        android:id="@+id/settings"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:showAsAction="ifRoom"
+        android:title="@string/settings"/>
 	
 	<item
         android:id="@+id/bluetooth"
         android:icon="@android:drawable/ic_menu_share"
         android:showAsAction="ifRoom"
-        android:title="Обмен картами"/>
+        android:title="@string/exchange"/>
 	
 	<item
         android:id="@+id/algorithm"
         android:icon="@android:drawable/ic_menu_compass"
         android:showAsAction="ifRoom"
-        android:title="Выбрать алгоритм"/>
+        android:title="@string/algorithm"/>
 
     <item
         android:id="@+id/selectColor"
         android:icon="@android:drawable/ic_menu_edit"
         android:showAsAction="ifRoom"
-        android:title="Выбрать цвета"/>
+        android:title="@string/color_picker"/>
     
 	<item
         android:id="@+id/changeWeight"
         android:icon="@android:drawable/ic_menu_rotate"
         android:showAsAction="ifRoom"
-        android:title="Изменить веса (A*)"/>
+        android:title="@string/weight_change"/>
 	
 	<item
         android:id="@+id/gridSize"
         android:icon="@android:drawable/ic_menu_add"
         android:showAsAction="ifRoom"
-        android:title="Размер поля"/>
+        android:title="@string/grid_size"/>
 	
 	<item
         android:id="@+id/theme"
         android:icon="@android:drawable/ic_menu_gallery"
         android:showAsAction="ifRoom"
-        android:title="Изменить тему"/>
+        android:title="@string/theme_selector"/>
 	
 	<item
         android:id="@+id/actionDelete"
         android:icon="@android:drawable/ic_menu_delete"
         android:showAsAction="never"
-        android:title="Удаление объектов"/>
+        android:title="@string/deleteObjects"/>
     
 </menu>

@@ -29,7 +29,6 @@ public class GridSizeDialog extends DialogFragment implements SeekBar.OnSeekBarC
 	
 	public interface GridSizeListener {
 		public void changeGridSize(DialogFragment dialog, int gridSizeValue);
-		public void invalidName(DialogFragment dialog);
 	}
 	
 	public GridSizeDialog() {

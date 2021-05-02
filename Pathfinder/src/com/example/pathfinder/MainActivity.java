@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -20,7 +18,6 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import databases.Cell;
@@ -28,31 +25,30 @@ import databases.Field;
 import databases.SQLController;
 import dialogs.GridSizeDialog;
 import dialogs.WeightDialog;
-import dialogs.AlgorithmSelector;
 import dialogs.AlgorithmSelector.AlgorithmListener;
+import dialogs.AlgorithmSelector;
 import dialogs.ColorPickDialog;
 import dialogs.ColorPickDialog.ColorPickListener;
 import dialogs.GridSizeDialog.GridSizeListener;
 import dialogs.MapDialog;
 import dialogs.MapDialog.MapListener;
 import dialogs.SaveDialog;
-import dialogs.SaveDialog.SaveDialogListener;
 import dialogs.ThemeDialog;
 import dialogs.ThemeDialog.ThemeListener;
+import dialogs.SaveDialog.SaveDialogListener;
 import dialogs.WeightDialog.WeightListener;
 import entities.Entity;
-import entities.Node;
 import entities.Obstacle;
 import math.Point;
 import views.AnimatePath;
 
 public class MainActivity extends Activity implements OnClickListener, ColorPickListener,
-		AlgorithmListener, SaveDialogListener, MapListener, WeightListener {
+		AlgorithmListener, SaveDialogListener, MapListener, WeightListener, GridSizeListener, ThemeListener {
 	// компоненты UI
 	Button start, algBtn;
 	Button player, obstacle, target;
 	TextView displayState, iterationsCount;
-	int px, py, tx, ty, pColor, tColor;
+	int px, py, tx, ty, pColor, tColor, pathColor;
 
 	ArrayList<Integer> oPosX, oPosY;
 	CheckBox cb, nbCheckBox, distanceCb;
@@ -71,6 +67,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	private int iterations = 0;
 	private int algorithm = 0;
 	private int theme = 0;
+	private boolean devMode = false; // false - использовать updated_menu.xml, true - menu.xml
 
 	// Экземпляр класса для анимаций
 	AnimatePath view;
@@ -147,7 +144,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.updated_menu, menu);
+		getMenuInflater().inflate(devMode == true ? R.menu.menu : R.menu.updated_menu, menu);
 		return true;
 	}
 
@@ -172,6 +169,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
 			settingsIntent.putExtra("gridSize", view.getGridSize());
 			settingsIntent.putExtra("theme", theme);
+			settingsIntent.putExtra("dev_mode", devMode);
 			startActivityForResult(settingsIntent, 1);
 			break;
 		case R.id.bluetooth:
@@ -186,6 +184,18 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			WeightDialog wd = new WeightDialog();
 			wd.show(getFragmentManager(), "ncost");
 			break;
+		case R.id.theme:
+			ThemeDialog themeDialog = new ThemeDialog();
+			themeDialog.show(getFragmentManager(), "theme");
+			break;
+		case R.id.algorithm:
+			AlgorithmSelector algDialog = new AlgorithmSelector();
+			algDialog.show(getFragmentManager(), "algorithm");
+			break;
+		case R.id.gridSize:
+		    GridSizeDialog gSizeDialog = new GridSizeDialog();
+		    gSizeDialog.show(getFragmentManager(), "grid");
+		    break;
 		case R.id.actionDelete:
 			state = State.DELETE;
 			displayState.setText("Удаление");
@@ -202,6 +212,12 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			changeGridSize(data.getIntExtra("gSize", 16));
 		    theme = data.getIntExtra("tcode", 0);
 		    onThemeSelected(theme);
+		    pColor = data.getIntExtra("pcolor", -1);
+		    tColor = data.getIntExtra("tcolor", -1);
+		    pathColor = data.getIntExtra("path_color", -1);
+		    onPickedColor(pColor, tColor, pathColor);
+		    devMode = data.getBooleanExtra("dev_mode", false);
+		    invalidateOptionsMenu();
 		} else
 			Toast.makeText(getApplicationContext(), "Произошла ошибка!", Toast.LENGTH_SHORT).show();
 	}
@@ -305,7 +321,7 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 					Toast.LENGTH_LONG).show();
 			return;
 		}
-		view.setGridSize(gridSizeValue/* , view.getGridSize() */);
+		view.setGridSize(gridSizeValue);
 		view.revertAllPositions(view.getPlayer().getGPosition(), view.getTarget().getGPosition(), view.getObstacles());
 	}
 
@@ -359,6 +375,11 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	@Override
 	public void onWeightSelected(int d, int h) {
 		Toast.makeText(getApplicationContext(), "Изменены веса: " + d + "d " + h + "h", Toast.LENGTH_SHORT).show();
+	}
+	
+	@Override
+	public void changeGridSize(DialogFragment dialog, int gridSizeValue) {
+		changeGridSize(gridSizeValue);
 	}
 
 	public void onThemeSelected(int theme) {
