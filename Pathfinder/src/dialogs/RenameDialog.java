@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import databases.Field;
 import databases.SQLController;
@@ -40,9 +42,9 @@ public class RenameDialog extends DialogFragment {
         LayoutInflater i = getActivity().getLayoutInflater();
         
         db.setTitle("Переименование поля");
-        View v = i.inflate(R.layout.save_dialog, null);
+        View v = i.inflate(R.layout.rename_dialog, null);
         
-        et = (EditText) v.findViewById(R.id.editText1);
+        et = (EditText) v.findViewById(R.id.newMapNameEt);
         
 		db.setView(v);
 		db.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
