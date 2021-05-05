@@ -3,7 +3,8 @@ package entities;
 import views.AnimatePath;
 
 public class Obstacle extends Entity {
-
+	
+	AnimatePath view;
 	private float distance;
 	private Obstacle neighbour;
 	private boolean mainObst;

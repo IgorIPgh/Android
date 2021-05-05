@@ -19,8 +19,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.example.pathfinder.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,13 +30,11 @@
         </activity>
         <activity
             android:name="com.example.pathfinder.SettingsActivity"
-            android:label="@string/settings"
-            android:screenOrientation="portrait" >
+            android:label="@string/settings" >
         </activity>
         <activity
             android:name="com.example.bluetoothspplibrary.DeviceList"
-            android:label="DeviceList"
-            android:screenOrientation="portrait" >
+            android:label="DeviceList" >
         </activity>
     </application>
 

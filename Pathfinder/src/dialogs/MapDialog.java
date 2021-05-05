@@ -43,7 +43,7 @@ public class MapDialog extends DialogFragment implements OnClickListener {
 	}
 	
 	public interface MapListener {
-		public void openMap(Field field);
+		public void openMap(Field field/*int id, String mapName */);
 	}
 	
 	MapListener listener;
@@ -80,7 +80,7 @@ public class MapDialog extends DialogFragment implements OnClickListener {
         controller = new SQLController(getActivity());
         controller.open();
         
-        if(controller.getProfilesCount() < 2) {
+        if(controller.getProfilesCount() < 1) {
         	noMapsDisplay.setVisibility(TextView.VISIBLE);
         	noMapsDisplay.setText("К сожалению, у вас ещё нет карт. Сохраните текущее поле.");
         }
@@ -126,9 +126,8 @@ public class MapDialog extends DialogFragment implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.btnMapDel:
 			if (field.id > 1) { // запись default не удаляем !
-				controller.deleteMap(field.id);
 				refresh();
-				displayState.setText("Карта удалена!");
+				displayState.setText("Удалено!");
 			}
 			break;
 		case R.id.btnMapLoad:

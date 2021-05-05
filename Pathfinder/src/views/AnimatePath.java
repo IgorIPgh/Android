@@ -595,12 +595,12 @@ public class AnimatePath extends View {
 		drawEndPoint(t.getX(), t.getY());
 		if(player.getGx() > limit) {
 			player.setGx(limit);
-			Point pPos = new Point(player.getX(), player.getY());
+			Point pPos = convertToScreenCoords(player.getGx(), player.getGy(), true);
 			drawPlayer(pPos.getX(), pPos.getY());
 		}	
 		if(player.getGy() > limit) {
 			player.setGy(limit);
-			Point pPos = new Point(player.getX(), player.getY());
+			Point pPos = convertToScreenCoords(player.getGx(), player.getGy(), true);
 			drawPlayer(pPos.getX(), pPos.getY());
 		}	
 		if(target.getGx() > limit)
