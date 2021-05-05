@@ -381,60 +381,49 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	public void changeGridSize(DialogFragment dialog, int gridSizeValue) {
 		changeGridSize(gridSizeValue);
 	}
+	
+	@SuppressWarnings("deprecation")
+	public void setTheme(int[] ids) {
+		// Изменение цвета текста
+		int mainColor = getResources().getColor(ids[0]);
+		int secondColor = getResources().getColor(ids[1]);
+		start.setTextColor(mainColor);
+		player.setTextColor(mainColor);
+		target.setTextColor(mainColor);
+		obstacle.setTextColor(mainColor);
+		algBtn.setTextColor(mainColor);
+		iterationsCount.setTextColor(secondColor);
+		displayState.setTextColor(mainColor);
+		cb.setTextColor(secondColor);
+		distanceCb.setTextColor(secondColor);
+		nbCheckBox.setTextColor(secondColor);
+
+		// Изменение заднего фона
+		start.setBackgroundResource(ids[3]);
+		player.setBackgroundResource(ids[4]);
+		target.setBackgroundResource(ids[4]);
+		obstacle.setBackgroundResource(ids[4]);
+		background.setBackgroundResource(ids[5]);
+		algBtn.setBackgroundResource(ids[4]);
+		if(ids[2] != -1)
+			background.setBackgroundColor(getResources().getColor(ids[2]));
+	}
 
 	public void onThemeSelected(int theme) {
 		this.theme = theme;
 		switch (theme) {
 		case 0: // Выбрана космическая тема
 			view.setClassic(false);
-
-			// HEX-код фиолетового цвета
-			int purpleColor = Color.rgb(247, 2, 141);
-
-			// Изменение цвета текста
-			start.setTextColor(purpleColor);
-			player.setTextColor(purpleColor);
-			target.setTextColor(purpleColor);
-			obstacle.setTextColor(purpleColor);
-			algBtn.setTextColor(purpleColor);
-			iterationsCount.setTextColor(Color.WHITE);
-			displayState.setTextColor(purpleColor);
-			cb.setTextColor(Color.WHITE);
-			distanceCb.setTextColor(Color.WHITE);
-			nbCheckBox.setTextColor(Color.WHITE);
-
-			// Изменение заднего фона
-			start.setBackgroundResource(R.drawable.start_btn);
-			player.setBackgroundResource(R.drawable.rounded_shape);
-			target.setBackgroundResource(R.drawable.rounded_shape);
-			obstacle.setBackgroundResource(R.drawable.rounded_shape);
-			background.setBackgroundResource(R.drawable.universe);
-			algBtn.setBackgroundResource(R.drawable.rounded_shape);
+			// RGB: 247 2 141 | HEX: #f7028d
+			int ids[] = new int[] {R.color.purple, R.color.white, -1, R.drawable.start_btn, R.drawable.rounded_shape, 
+					R.drawable.universe};
+			setTheme(ids);
 			break;
-
 		case 1: // Выбрана классическая тема
 			view.setClassic(true);
-
-			// Изменение цвета текста
-			start.setTextColor(Color.BLACK);
-			player.setTextColor(Color.BLACK);
-			target.setTextColor(Color.BLACK);
-			obstacle.setTextColor(Color.BLACK);
-			iterationsCount.setTextColor(Color.BLACK);
-			algBtn.setTextColor(Color.BLACK);
-			displayState.setTextColor(Color.BLACK);
-			cb.setTextColor(Color.BLACK);
-			distanceCb.setTextColor(Color.BLACK);
-			nbCheckBox.setTextColor(Color.BLACK);
-
-			// Изменение заднего фона
-			start.setBackgroundResource(R.drawable.classic_start_btn);
-			player.setBackgroundResource(R.drawable.classic_shape);
-			obstacle.setBackgroundResource(R.drawable.classic_shape);
-			target.setBackgroundResource(R.drawable.classic_shape);
-			algBtn.setBackgroundResource(R.drawable.classic_shape);
-			background.setBackgroundResource(R.drawable.classic_shape);
-			background.setBackgroundColor(Color.WHITE);
+			int classicIDs[] = new int[] {R.color.black, R.color.black, R.color.white, 
+					R.drawable.classic_start_btn, R.drawable.classic_shape, R.drawable.classic_shape};
+			setTheme(classicIDs);
 			break;
 		}
 	}
