@@ -21,13 +21,10 @@ import databases.SQLController;
 
 public class SaveDialog extends DialogFragment {
 	private SQLController controller;
-	private SimpleCursorAdapter adapter;
 	private EditText mapEt;
-	private TextView savedMapsStatus;
-	private ListView mapLv;
 
 	public interface SaveDialogListener {
-		public void saveMap(String mapName);
+		public void saveDevMap(String mapName);
 	}	
 	private SaveDialogListener listener;
 
@@ -39,33 +36,17 @@ public class SaveDialog extends DialogFragment {
         db.setTitle("Сохранение карты");
         View v = i.inflate(R.layout.save_dialog, null);        
         mapEt = (EditText) v.findViewById(R.id.editText1);
-        savedMapsStatus = (TextView) v.findViewById(R.id.textView2);
-        mapLv = (ListView) v.findViewById(R.id.saveMapLv);
         
         controller = new SQLController(getActivity());
         controller.open();
-        
-        int ids = controller.getProfilesCount();
-        if(ids > 1) {
-        	Cursor cursor = controller.readMaps();
-     		String[] from = new String[] { DBHelper.ID, DBHelper.MAP_NAME };
-     		int[] to = new int[] { R.id.rowid, R.id.mapname };
-     		adapter = new SimpleCursorAdapter(getActivity(), R.layout.map_list, cursor, from, to, 1);
-    		adapter.notifyDataSetChanged();
-     		mapLv.setAdapter(adapter);
-     		controller.close();
-        } else {
-        	savedMapsStatus.setText("К сожалению, у вас ещё нет карт. Сохраните текущее поле.");
-        	controller.close();
-        }
         
 		db.setView(v);
 		db.setPositiveButton("Сохранить", new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		    	if(mapEt.getText().toString().length() == 0) {
-		    		Toast.makeText(getActivity().getApplicationContext(), "Введите название!", Toast.LENGTH_SHORT);
+		    		Toast.makeText(getActivity().getApplicationContext(), "Введите название!", Toast.LENGTH_SHORT).show();
 		    		return;}
-		    	listener.saveMap(mapEt.getText().toString());
+		    	listener.saveDevMap(mapEt.getText().toString());
 		    }
 		});
 		db.setNegativeButton("Закрыть", new DialogInterface.OnClickListener() {

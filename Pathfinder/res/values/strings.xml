@@ -10,7 +10,7 @@
     <string name="connect">Подключить</string>
     <string name="send">Отправить</string>
     <string name="clear">Очистить</string>
-    <string name="save">Сохранить</string>
+    <string name="save">Save</string>
     <string name="bt_not_available">Bluetooth не доступен</string>
     <string name="bt_not_enabled">Bluetooth не был включён</string>
     <string name="status_not_connected">Bluetooth не подключён</string>
@@ -28,5 +28,13 @@
     <string name="default_gsize_message">Выбранный размер: 16</string>
     <string name="developer_mode">Режим разработчика</string>
     <string name="save_and_exit">Сохранить и выйти</string>
+    <string name="saved_maps">Сохраннённые карты</string>
+    <string name="execute">Ок</string>
+    <string name="exit">Выход</string>
+    <string name="info">Инфо</string>
+    <string name="rename">Rename</string>
+    <string name="map_list">Список карт</string>
+    <string name="enter_map_name">Введите название карты</string>
+    <string name="enter_new_map_name">Введите новое название карты</string>
 
 </resources>

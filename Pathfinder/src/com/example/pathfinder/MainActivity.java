@@ -26,6 +26,8 @@ import databases.SQLController;
 import dialogs.GridSizeDialog;
 import dialogs.WeightDialog;
 import dialogs.AlgorithmSelector.AlgorithmListener;
+import dialogs.ChangeMapDialog;
+import dialogs.ChangeMapDialog.ChangeMapListener;
 import dialogs.AlgorithmSelector;
 import dialogs.ColorPickDialog;
 import dialogs.ColorPickDialog.ColorPickListener;
@@ -43,7 +45,7 @@ import math.Point;
 import views.AnimatePath;
 
 public class MainActivity extends Activity implements OnClickListener, ColorPickListener,
-		AlgorithmListener, SaveDialogListener, MapListener, WeightListener, GridSizeListener, ThemeListener {
+		AlgorithmListener, WeightListener, GridSizeListener, ThemeListener, ChangeMapListener, MapListener, SaveDialogListener {
 	// компоненты UI
 	Button start, algBtn;
 	Button player, obstacle, target;
@@ -152,15 +154,30 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.loadMap:
-			MapDialog loadDialog = new MapDialog(displayState);
+			ChangeMapDialog loadDialog = new ChangeMapDialog(0);
 			loadDialog.show(getFragmentManager(), "load");
 			break;
 		case R.id.saveMap:
 			if (view.getPlayer() == null || view.getPlayer().getDeleted() // 
 			 || view.getTarget() == null || view.getTarget().getDeleted())
 				break;
-			SaveDialog saveDialog = new SaveDialog();
+			ChangeMapDialog saveDialog = new ChangeMapDialog(1);
 			saveDialog.show(getFragmentManager(), "save");
+			break;
+		case R.id.mapList:
+			ChangeMapDialog mapListDialog = new ChangeMapDialog(2);
+			mapListDialog.show(getFragmentManager(), "delete");
+			break;
+		case R.id.devLoadMap:
+			MapDialog devLoadDialog = new MapDialog(displayState);
+			devLoadDialog.show(getFragmentManager(), "loadDev");
+			break;
+		case R.id.devSaveMap:
+			if (view.getPlayer() == null || view.getPlayer().getDeleted() // 
+			 || view.getTarget() == null || view.getTarget().getDeleted())
+				break;
+			SaveDialog devSaveDialog = new SaveDialog();
+			devSaveDialog.show(getFragmentManager(), "saveDev");
 			break;
 		case R.id.clearMap:
 			view.clearMap();
@@ -427,6 +444,11 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 			break;
 		}
 	}
+	
+	@Override
+	public void saveDevMap(String mapName) {
+		saveMap(mapName);
+	}
 
 	@Override
 	public void saveMap(String mapName) {
@@ -474,6 +496,11 @@ public class MainActivity extends Activity implements OnClickListener, ColorPick
 		}
 
 		displayState.setText("Карта Сохранена");
+	}
+
+	@Override
+	public void openDevMap(Field field) {
+		openMap(field);
 	}
 
 	@Override

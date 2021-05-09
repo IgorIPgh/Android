@@ -26,6 +26,12 @@
         android:title="@string/settings"/>
 	
 	<item
+        android:id="@+id/mapList"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:showAsAction="ifRoom"
+        android:title="@string/map_list"/>
+	
+	<item
         android:id="@+id/changeWeight"
         android:icon="@android:drawable/ic_menu_rotate"
         android:showAsAction="ifRoom"

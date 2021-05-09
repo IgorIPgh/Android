@@ -43,7 +43,7 @@ public class MapDialog extends DialogFragment implements OnClickListener {
 	}
 	
 	public interface MapListener {
-		public void openMap(Field field);
+		public void openDevMap(Field field);
 	}
 	
 	MapListener listener;
@@ -80,9 +80,13 @@ public class MapDialog extends DialogFragment implements OnClickListener {
         controller = new SQLController(getActivity());
         controller.open();
         
+        // Для случая, если карта не будет выбрана
+        selected_id = -1;
+        
         if(controller.getProfilesCount() < 2) {
         	noMapsDisplay.setVisibility(TextView.VISIBLE);
         	noMapsDisplay.setText("К сожалению, у вас ещё нет карт. Сохраните текущее поле.");
+        	controller.close();
         }
         else {
         	controller = new SQLController(getActivity());
@@ -118,6 +122,7 @@ public class MapDialog extends DialogFragment implements OnClickListener {
 			});
         }
         
+        controller.close();
         return db.create();
     }
 	
@@ -125,18 +130,21 @@ public class MapDialog extends DialogFragment implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btnMapDel:
-			if (field.id > 1) { // запись default не удаляем !
-				controller.deleteMap(field.id);
-				refresh();
-				displayState.setText("Карта удалена!");
-			}
+			if(selected_id != -1) {
+				if (field.id > 1) { // запись default не удаляем !
+					controller.deleteMap(field.id);
+					refresh();
+					displayState.setText("Карта удалена!");
+				}
+			} else
+				Toast.makeText(getActivity(), "Выберите карту!", Toast.LENGTH_SHORT).show();
 			break;
 		case R.id.btnMapLoad:
 			if(selected_id == -1) {
-				Toast.makeText(getActivity(), "Выберите карту!", Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity(), "Выберите карту!", Toast.LENGTH_SHORT).show();
 				return;
 			}
-			listener.openMap(field/* .id , field.mapName */);
+			listener.openDevMap(field/* .id , field.mapName */);
 			getDialog().dismiss();
 			break;
 		case R.id.btnMapClose:
